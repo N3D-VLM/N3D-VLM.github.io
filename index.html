@@ -1231,53 +1231,6 @@
     </div>
 </div>
 
-<script>
-    // 自动监听当前页面上所有的 model-viewer 组件
-    document.addEventListener('DOMContentLoaded', () => {
-        const debugOrbit = document.getElementById('debug-orbit');
-        const debugTarget = document.getElementById('debug-target');
-        const debugFov = document.getElementById('debug-fov');
-
-        function attachDebugListeners() {
-            const viewers = document.querySelectorAll('model-viewer');
-            
-            viewers.forEach(viewer => {
-                // 监听相机变化事件
-                viewer.addEventListener('camera-change', (event) => {
-                    // 获取当前相机的参数
-                    const orbit = viewer.getCameraOrbit();
-                    const target = viewer.getCameraTarget();
-                    const fov = viewer.getFieldOfView();
-
-                    // 格式化输出
-                    // Orbit: theta(deg) phi(deg) radius(m)
-                    const orbitStr = `${(orbit.theta * 180 / Math.PI).toFixed(0)}deg ${(orbit.phi * 180 / Math.PI).toFixed(0)}deg ${orbit.radius.toFixed(2)}m`;
-                    
-                    // Target: x(m) y(m) z(m)
-                    const targetStr = `${target.x.toFixed(2)}m ${target.y.toFixed(2)}m ${target.z.toFixed(2)}m`;
-                    
-                    // FOV: deg
-                    const fovStr = `${fov.toFixed(0)}deg`;
-
-                    // 更新面板
-                    debugOrbit.innerText = orbitStr;
-                    debugTarget.innerText = targetStr;
-                    debugFov.innerText = fovStr;
-                    
-                    // 高亮当前操作的 viewer 边框，方便确认
-                    viewers.forEach(v => v.style.outline = 'none');
-                    viewer.style.outline = '2px solid #00ff00';
-                });
-            });
-        }
-
-        // 初始绑定
-        attachDebugListeners();
-
-        // 因为你的页面有动态切换模型逻辑，每隔2秒重新绑定一次，防止丢失监听
-        setInterval(attachDebugListeners, 2000);
-    });
-</script>
 
 </body>
 </html>
