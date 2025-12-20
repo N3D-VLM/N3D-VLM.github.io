@@ -307,7 +307,7 @@
             <div style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; background: #000;">
                 <video width="100%" autoplay muted loop playsinline controls style="display: block;">
                 <!-- <video width="100%" autoplay loop playsinline controls style="display: block;"> -->
-                    <source src="images/teaser2_s1.25_audiofade3.mp4" type="video/mp4">
+                    <source src="images/teaser3_s1.25_audiofade3.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -423,6 +423,22 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 【新增】 Baseline 3 (Gemini3-Pro) -->
+                    <!-- 注意：这里加了 id="qa-b3-card" 和 style="display:none" -->
+                    <div class="model-card baseline" id="qa-b3-card" style="display:none; margin-top: 8px;">
+                        <div class="card-header">
+                            <span class="model-name" id="qa-b3-name"><i class="fas fa-robot"></i> ...</span>
+                            <span id="qa-b3-badge" class="modality-badge badge-rgb">RGB</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="qa-b3-reasoning" class="model-reasoning-content animate-text">...</div>
+                            <div class="result-footer animate-text" style="color:var(--fail-text)">
+                                <span id="qa-b3-ans">...</span> <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- 3. Point Cloud -->
@@ -690,6 +706,32 @@
             cameraOrbit: "45deg 55deg 55m",
             b1_name: "SpatialRGPT-8B",  
             b2_name: "SpatialReasoner-7B",
+        },
+        {
+            id: 4,
+            label: "Clock Direction",
+            thumb: "images/QA_0_bbox.jpg",
+            question: "If you are at 4_hotair_ballon, where will you find 2_hotair_ballon in clock direction? (Assuming you and the camera face the same direction, which is 12 o'clock.) ?",
+            rgb: "images/QA_0_bbox.jpg",
+            model_url: "images/QA_0.glb",
+            b1_res: "From (…) 4_hotair_ballon, facing forward (toward the camera’s view = 12 o'clock), 2_hotair_ballon is down-left (behind and to the left), that corresponds to approximately 8 o'clock.",
+            b1_ans: "Wrong answer",
+            // b2_res: "You are standing at the location of hot air balloon number 4, facing the 12 o'clock direction. From your perspective, hot air balloon number 2 is to your left. (…) Since hot air balloon number 2 is clearly to the left of hot air balloon number 4 and is relatively close, we can reasonably infer that it is at the 9 o'clock direction. Final Answer: 9 o'clock.",
+            // b2_ans: "Wrong answer",
+            b2_res: "Based on the position of the balloons in the image: Start at balloon 4 (the large yellow/green balloon). Imagine this is the center of your clock. Look towards balloon 2 (the smaller yellow/checkered balloon). Balloon 2 is located to the left and slightly downwards from balloon 4. Directly left would be 9 o'clock. Directly down would be 6 o'clock. Since it is mostly to the left but dipped down, the direction is approximately 8 o'clock.",
+            b2_ans: "Wrong answer",
+            ours_detect_list: [
+                { id: "4_1", text: "bbox_2=Bbox(suv,0.50,0.68,4.92,4.20,1.70,0.63)", fulltext: "", matName: "bbox_object2_hotair____________________________ballon_2" },
+                { id: "4_2", text: "bbox_4=Bbox(ambulance,0.08,0.54,7.99,1.02,2.30,2.45)", fulltext: "", matName: "bbox_object4_hotair____________________________ballon_4" },
+            ],
+            ours_reasoning: "<think>(…) We can calculate the direction as follows: Step 1: Calculate the vector from A to B: (…) (-5.84, -9.59). Step 2: Calculate the angle between the vector and the positive x-axis (…). normalized_angle=31.96 degrees. (…) clock_position = 12 - (normalized_angle // 30) = 11.0. </think> ",
+            ours_ans: "4_hotair_ballon will find 2_hotair_ballon around the 11 o'clock direction. ",
+            cameraOrbit: "45deg 55deg 2901m",
+            cameraTarget: "-487m -365m -469m", 
+            fieldOfView: "5deg",
+            b1_name: "GPT-4o",  
+            // b2_name: "Qwen3-VL-8B",
+            b2_name: "Gemini-3-Pro",
         }
     ];
 
@@ -975,6 +1017,24 @@
             document.getElementById('qa-b1-ans').innerText = data.b1_ans;
             document.getElementById('qa-b2-reasoning').innerText = data.b2_res;
             document.getElementById('qa-b2-ans').innerText = data.b2_ans;
+
+            // =========== 【新增】 处理 Baseline 3 ===========
+            const b3Card = document.getElementById('qa-b3-card');
+            
+            // 检查数据中是否有 b3_res (第三个模型的回答)
+            if (data.b3_res) {
+                b3Card.style.display = 'block'; // 显示卡片
+                
+                const b3Name = data.b3_name || 'Gemini3-Pro';
+                document.getElementById('qa-b3-name').innerHTML = `<i class="fas fa-robot"></i> ${b3Name}`;
+                document.getElementById('qa-b3-reasoning').innerText = data.b3_res;
+                document.getElementById('qa-b3-ans').innerText = data.b3_ans;
+                
+                // 如果需要支持动画效果，也可以加在这里
+            } else {
+                b3Card.style.display = 'none'; // 如果没有数据，隐藏卡片
+            }
+            // ==============================================
             
             detectBox.innerHTML = ''; 
             if (data.ours_detect_list && data.ours_detect_list.length > 0) {
@@ -1004,6 +1064,8 @@
                 detectBox.innerText = "No detection data.";
             }
 
+
+
             const formattedReasoning = `<div><span class="think-label">&lt;think&gt;</span>${data.ours_reasoning}</div>`;
             document.getElementById('qa-ours-reasoning').innerHTML = formattedReasoning;
             document.getElementById('qa-ours-ans').innerText = data.ours_ans;
@@ -1015,6 +1077,12 @@
             animateTextChange('qa-b1-ans', data.b1_ans);
             animateTextChange('qa-b2-reasoning', data.b2_res);
             animateTextChange('qa-b2-ans', data.b2_ans);
+
+            // 【新增】 Baseline 3 动画
+            if (data.b3_res) {
+                animateTextChange('qa-b3-reasoning', data.b3_res);
+                animateTextChange('qa-b3-ans', data.b3_ans);
+            }
             
             const reasoningEl = document.getElementById('qa-ours-reasoning');
             reasoningEl.classList.add('changing');
@@ -1030,9 +1098,23 @@
                 imgRgb.src = data.rgb;
                 modelViewer.src = '';
                 setTimeout(() => {
+                    // modelViewer.src = data.model_url;
+                    // modelViewer.setAttribute('camera-orbit', data.cameraOrbit || "45deg 55deg 30m");
+                    // imgRgb.onload = () => { imgRgb.style.opacity = '1'; };
                     modelViewer.src = data.model_url;
+                    // 1. 设置相机轨道
                     modelViewer.setAttribute('camera-orbit', data.cameraOrbit || "45deg 55deg 30m");
+                    // 2. [新增] 设置聚焦中心 (Target)
+                    modelViewer.setAttribute('camera-target', data.cameraTarget || "auto");
+                    // 3. [新增] 设置视野 (FOV)
+                    modelViewer.setAttribute('field-of-view', data.fieldOfView || "30deg");
+                    // 4. [新增] 解除默认限制，允许极近距离和极窄视野
+                    modelViewer.setAttribute('min-camera-orbit', 'auto auto auto');
+                    modelViewer.setAttribute('max-camera-orbit', 'auto auto auto');
+                    modelViewer.setAttribute('min-field-of-view', '1deg');
                     imgRgb.onload = () => { imgRgb.style.opacity = '1'; };
+
+
                     if (imgRgb.complete) imgRgb.style.opacity = '1';
                     
                     // Reasoning Section: Hide all boxes by default
@@ -1055,10 +1137,25 @@
             }, 300);
 
         } else {
+            // updateText();
+            // document.getElementById('qa-img-rgb').src = data.rgb;
+            // document.getElementById('qa-model-3d').src = data.model_url;
+            // document.getElementById('qa-model-3d').setAttribute('camera-orbit', data.cameraOrbit || "45deg 55deg 30m");
             updateText();
             document.getElementById('qa-img-rgb').src = data.rgb;
-            document.getElementById('qa-model-3d').src = data.model_url;
-            document.getElementById('qa-model-3d').setAttribute('camera-orbit', data.cameraOrbit || "45deg 55deg 30m");
+            
+            const mv = document.getElementById('qa-model-3d');
+            mv.src = data.model_url;
+            
+            // 应用所有相机参数
+            mv.setAttribute('camera-orbit', data.cameraOrbit || "45deg 55deg 30m");
+            mv.setAttribute('camera-target', data.cameraTarget || "auto");
+            mv.setAttribute('field-of-view', data.fieldOfView || "30deg");
+            
+            // 解除限制
+            mv.setAttribute('min-camera-orbit', 'auto auto auto');
+            mv.setAttribute('max-camera-orbit', 'auto auto auto');
+            mv.setAttribute('min-field-of-view', '1deg');
         }
     }
 
@@ -1253,6 +1350,89 @@
         });
     });
 
+</script>
+
+
+<!-- ========================================================= -->
+<!-- 临时调试工具：实时显示相机参数 (调试完后可删除) -->
+<!-- ========================================================= -->
+<div id="debug-panel" style="
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    background: rgba(0, 0, 0, 0.85); 
+    color: #00ff00; 
+    padding: 15px; 
+    border-radius: 8px; 
+    font-family: monospace; 
+    font-size: 14px; 
+    z-index: 9999; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    max-width: 300px;
+">
+    <div style="border-bottom: 1px solid #444; margin-bottom: 8px; padding-bottom: 4px; font-weight: bold; color: #fff;">
+        📷 Camera Debugger
+    </div>
+    <div style="margin-bottom: 4px;">
+        <span style="color:#aaa">Orbit:</span> <span id="debug-orbit">Waiting...</span>
+    </div>
+    <div style="margin-bottom: 4px;">
+        <span style="color:#aaa">Target:</span> <span id="debug-target">Waiting...</span>
+    </div>
+    <div>
+        <span style="color:#aaa">FOV:</span> <span id="debug-fov">Waiting...</span>
+    </div>
+    <div style="margin-top:8px; font-size:11px; color:#888;">
+        操作模型，复制上方参数填入代码
+    </div>
+</div>
+
+<script>
+    // 自动监听当前页面上所有的 model-viewer 组件
+    document.addEventListener('DOMContentLoaded', () => {
+        const debugOrbit = document.getElementById('debug-orbit');
+        const debugTarget = document.getElementById('debug-target');
+        const debugFov = document.getElementById('debug-fov');
+
+        function attachDebugListeners() {
+            const viewers = document.querySelectorAll('model-viewer');
+            
+            viewers.forEach(viewer => {
+                // 监听相机变化事件
+                viewer.addEventListener('camera-change', (event) => {
+                    // 获取当前相机的参数
+                    const orbit = viewer.getCameraOrbit();
+                    const target = viewer.getCameraTarget();
+                    const fov = viewer.getFieldOfView();
+
+                    // 格式化输出
+                    // Orbit: theta(deg) phi(deg) radius(m)
+                    const orbitStr = `${(orbit.theta * 180 / Math.PI).toFixed(0)}deg ${(orbit.phi * 180 / Math.PI).toFixed(0)}deg ${orbit.radius.toFixed(2)}m`;
+                    
+                    // Target: x(m) y(m) z(m)
+                    const targetStr = `${target.x.toFixed(2)}m ${target.y.toFixed(2)}m ${target.z.toFixed(2)}m`;
+                    
+                    // FOV: deg
+                    const fovStr = `${fov.toFixed(0)}deg`;
+
+                    // 更新面板
+                    debugOrbit.innerText = orbitStr;
+                    debugTarget.innerText = targetStr;
+                    debugFov.innerText = fovStr;
+                    
+                    // 高亮当前操作的 viewer 边框，方便确认
+                    viewers.forEach(v => v.style.outline = 'none');
+                    viewer.style.outline = '2px solid #00ff00';
+                });
+            });
+        }
+
+        // 初始绑定
+        attachDebugListeners();
+
+        // 因为你的页面有动态切换模型逻辑，每隔2秒重新绑定一次，防止丢失监听
+        setInterval(attachDebugListeners, 2000);
+    });
 </script>
 
 </body>
