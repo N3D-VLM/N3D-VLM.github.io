@@ -643,8 +643,8 @@
             b2_res: "Based on the position of the balloons in the image: Start at balloon 4 (the large yellow/green balloon). Imagine this is the center of your clock. Look towards balloon 2 (the smaller yellow/checkered balloon). Balloon 2 is located to the left and slightly downwards from balloon 4. Directly left would be 9 o'clock. Directly down would be 6 o'clock. Since it is mostly to the left but dipped down, the direction is approximately 8 o'clock.",
             b2_ans: "Wrong answer",
             ours_detect_list: [
-                { id: "4_1", text: "bbox_2=Bbox(suv,0.50,0.68,4.92,4.20,1.70,0.63)", fulltext: "", matName: "bbox_object2_hotair____________________________ballon_2" },
-                { id: "4_2", text: "bbox_4=Bbox(ambulance,0.08,0.54,7.99,1.02,2.30,2.45)", fulltext: "", matName: "bbox_object4_hotair____________________________ballon_4" },
+                { id: "4_1", text: "bbox_2=Bbox(hotair ballon,0.23,0.51,27.29,1.75,2.14,0.89)", fulltext: "", matName: "bbox_object2_hotair____________________________ballon_2" },
+                { id: "4_2", text: "bbox_4=Bbox(hotair ballon,0.39,0.41,17.70,2.55,3.21,1.12)", fulltext: "", matName: "bbox_object4_hotair____________________________ballon_4" },
             ],
             ours_reasoning: "<think>(…) We can calculate the direction as follows: Step 1: Calculate the vector from A to B: (…) (-5.84, -9.59). Step 2: Calculate the angle between the vector and the positive x-axis (…). normalized_angle=31.96 degrees. (…) clock_position = 12 - (normalized_angle // 30) = 11.0. </think> ",
             ours_ans: "4_hotair_ballon will find 2_hotair_ballon around the 11 o'clock direction. ",
